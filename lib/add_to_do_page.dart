@@ -97,7 +97,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
             print('Error saving item: $item');
             print('Status Code: ${itemResponse.statusCode}');
             print('Response Body: ${itemResponse.body}');
-            throw Exception('Failed to save checklist item: $item');
+            throw Exception('Failed to save checklist items: $item');
           }
         }
 
