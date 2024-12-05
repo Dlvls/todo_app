@@ -54,7 +54,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
         throw Exception('Token not found. Please login again.');
       }
 
-      // Save the checklist with title
+      // Step 1: Save the checklist
       final checklistResponse = await http.post(
         Uri.parse('$baseUrl/checklist'),
         headers: {
@@ -66,15 +66,21 @@ class _AddToDoPageState extends State<AddToDoPage> {
 
       if (checklistResponse.statusCode == 200 ||
           checklistResponse.statusCode == 201) {
-        final checklistData = jsonDecode(checklistResponse.body);
-        final checklistId =
-            checklistData['id']; // Assuming 'id' is returned by the API
+        final Map<String, dynamic> checklistData =
+            jsonDecode(checklistResponse.body);
 
-        // Log for debugging
-        print('Checklist created with ID: $checklistId');
+        // Debugging response to see the full response body
+        print('Checklist Response Body: ${checklistResponse.body}');
 
-        // Save each checklist item to the API
-        for (String item in checklistItems) {
+        // Memastikan checklistId ada dan bertipe int
+        if (checklistData['id'] == null || checklistData['id'] is! int) {
+          throw Exception('Checklist ID not found or is not a valid integer.');
+        }
+
+        final int checklistId = checklistData['id'];
+
+        // Step 2: Save checklist items
+        for (final item in checklistItems) {
           final itemResponse = await http.post(
             Uri.parse('$baseUrl/checklist/$checklistId/item'),
             headers: {
@@ -86,25 +92,30 @@ class _AddToDoPageState extends State<AddToDoPage> {
 
           if (itemResponse.statusCode != 200 &&
               itemResponse.statusCode != 201) {
-            throw Exception(
-                'Failed to save checklist item: ${itemResponse.body}');
+            print('Error saving item: $item');
+            print('Status Code: ${itemResponse.statusCode}');
+            print('Response Body: ${itemResponse.body}');
+            throw Exception('Failed to save checklist item: $item');
           }
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Checklist and items saved successfully!')),
+          const SnackBar(content: Text('Checklist saved successfully!')),
         );
 
+        // Clear the title and checklist items after saving
         titleController.clear();
         setState(() {
           checklistControllers.clear();
         });
       } else {
-        throw Exception(
-            'Failed to create checklist: ${checklistResponse.body}');
+        print('Error saving checklist');
+        print('Status Code: ${checklistResponse.statusCode}');
+        print('Response Body: ${checklistResponse.body}');
+        throw Exception('Failed to save checklist');
       }
     } catch (e) {
+      print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving checklist: $e')),
       );
