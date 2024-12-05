@@ -69,8 +69,17 @@ class _AddToDoPageState extends State<AddToDoPage> {
           checklistResponse.statusCode == 201) {
         final Map<String, dynamic> checklistData =
             jsonDecode(checklistResponse.body);
+        print(
+            "Checklist Data: $checklistData"); // Debugging line to check the response
+
+        // Access the 'data' field to get the checklist id
+        final Map<String, dynamic> data = checklistData['data'];
         final int checklistId =
-            checklistData['id']; // Get the generated checklist ID
+            data['id']; // Get the generated checklist ID from 'data'
+
+        if (checklistId == null) {
+          throw Exception('Checklist ID is missing in the response');
+        }
 
         // Step 2: Save checklist items using the generated checklist ID
         for (final item in checklistItems) {
