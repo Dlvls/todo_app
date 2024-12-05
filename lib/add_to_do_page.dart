@@ -61,25 +61,18 @@ class _AddToDoPageState extends State<AddToDoPage> {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'name': title}),
+        body: jsonEncode(
+            {'name': title}), // Only send name (id is handled by the server)
       );
 
       if (checklistResponse.statusCode == 200 ||
           checklistResponse.statusCode == 201) {
         final Map<String, dynamic> checklistData =
             jsonDecode(checklistResponse.body);
+        final int checklistId =
+            checklistData['id']; // Get the generated checklist ID
 
-        // Debugging response to see the full response body
-        print('Checklist Response Body: ${checklistResponse.body}');
-
-        // Memastikan checklistId ada dan bertipe int
-        if (checklistData['id'] == null || checklistData['id'] is! int) {
-          throw Exception('Checklist ID not found or is not a valid integer.');
-        }
-
-        final int checklistId = checklistData['id'];
-
-        // Step 2: Save checklist items
+        // Step 2: Save checklist items using the generated checklist ID
         for (final item in checklistItems) {
           final itemResponse = await http.post(
             Uri.parse('$baseUrl/checklist/$checklistId/item'),
@@ -87,7 +80,7 @@ class _AddToDoPageState extends State<AddToDoPage> {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
             },
-            body: jsonEncode({'itemName': item}),
+            body: jsonEncode({'itemName': item}), // Only send itemName
           );
 
           if (itemResponse.statusCode != 200 &&
