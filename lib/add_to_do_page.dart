@@ -96,7 +96,6 @@ class _AddToDoPageState extends State<AddToDoPage> {
               content: Text('Checklist and items saved successfully!')),
         );
 
-        // Clear the title and checklist items after saving
         titleController.clear();
         setState(() {
           checklistControllers.clear();
